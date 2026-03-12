@@ -1,0 +1,8 @@
+# Copy to config.yaml and update paths.
+transcript_paths:
+  - ./transcripts
+agent: codex
+cwd: /Users/charley/codex/questions
+session_output_dir: logs/sessions
+redaction_patterns:
+  - "(?i)api[_-]?key\\s*[:=]\\s*[^\\s]+"
