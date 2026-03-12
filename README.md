@@ -28,24 +28,55 @@ Each line in `logs/qa.jsonl` is a JSON object:
 
 ## Usage
 
-Run from this folder.
+## Installation
+
+Install in editable mode from this folder:
 
 ```bash
-python -m qa_logger log-turn \
+python3 -m pip install -e .
+```
+
+If your environment is offline or has older `pip` tooling, use:
+
+```bash
+python3 -m pip install -e . --no-use-pep517
+```
+
+Using `uv`:
+
+```bash
+./scripts/install_with_uv.sh
+```
+
+`pipx`-style install with `uv` (installs CLI onto your user tool path):
+
+```bash
+uv tool install .
+uv tool update-shell
+```
+
+After restarting your shell, `qa-logger --help` should work without activating `.venv`.
+
+## Usage
+
+```bash
+qa-logger log-turn \
   --question "purpose of this folder?" \
   --response "to log codex Q&A"
 ```
 
 ```bash
-python -m qa_logger wrap \
+qa-logger wrap \
   --question "What is 2+2?" \
   --command "echo 4"
 ```
 
 ```bash
 cp config.example.yaml config.yaml
-python -m qa_logger parse-transcript --config config.yaml
+qa-logger parse-transcript --config config.yaml
 ```
+
+You can still use `python3 -m qa_logger ...` if preferred.
 
 ## Config file
 
