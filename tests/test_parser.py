@@ -45,6 +45,43 @@ class TestTranscriptParser(unittest.TestCase):
             names = [f.name for f in files]
             self.assertEqual(names, ["a.jsonl", "b.txt"])
 
+    def test_entries_from_json_messages_with_nested_content(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "session.json"
+            payload = {
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": [{"text": "Line 1"}, {"content": "Line 2"}],
+                        "created_at": "2026-03-12T03:00:00Z",
+                    },
+                    {
+                        "role": "assistant",
+                        "content": [{"text": "Answer"}],
+                        "created_at": "2026-03-12T03:00:01Z",
+                    },
+                ]
+            }
+            path.write_text(json.dumps(payload), encoding="utf-8")
+
+            entries = entries_from_transcript(path, cwd="/tmp", agent="codex")
+            self.assertEqual(len(entries), 1)
+            self.assertEqual(entries[0]["question"], "Line 1\nLine 2")
+            self.assertEqual(entries[0]["response"], "Answer")
+            self.assertEqual(entries[0]["timestamp"], "2026-03-12T03:00:00Z")
+
+    def test_entries_from_text_uses_file_timestamp_when_missing(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / "session.txt"
+            path.write_text("User: Q\nAssistant: A\n", encoding="utf-8")
+
+            entries = entries_from_transcript(path, cwd="/tmp", agent="codex")
+            self.assertEqual(len(entries), 1)
+            # Fallback timestamp should be generated from file mtime in UTC format.
+            self.assertTrue(entries[0]["timestamp"].endswith("Z"))
+            self.assertEqual(entries[0]["question"], "Q")
+            self.assertEqual(entries[0]["response"], "A")
+
 
 if __name__ == "__main__":
     unittest.main()
